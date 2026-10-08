@@ -1,18 +1,22 @@
-# NETRA x TRIKAL assistant
+# Netra Trikal Assistant
 
-Planned AI assistant for the Netra Trikaal astrology app, by Prayagi Store and Services.
+Offline, on-device personal assistant for Android by Prayagi Store and Services. Two assistants in one app: NETRA (warm) and TRIKAL (brief). Part of the [Netra Eco](https://prayagi-store-and-services.github.io/netra-eco/) family.
 
-## Status: planned, no code yet
+This is a separate app from [Netra Trikaal](https://github.com/prayagi-store-and-services/netra-trikaal), the astrology app. This assistant has no astrology features and holds no birth details.
 
-This repository is a placeholder so the project is visible and tracked. The assistant is being designed in AI Studio. Nothing here is released, and no source code has been published yet.
+## Status: rolling beta
 
-## Direction
+Pre-releases are published on the [releases page](https://github.com/prayagi-store-and-services/netra-trikal-assistant/releases) only when CI is green. Today it answers typed questions about battery (level, temperature, rough time left), volume and brightness, with persona-specific replies. Voice, saved memory, Family Bridge and on-device AI are planned. Dates are in the [milestones](https://github.com/prayagi-store-and-services/netra-trikal-assistant/milestones). Public release target: 1 April 2027.
 
-- Privacy first: personal birth details stay on the device. Any cloud step will show exactly what is sent and where, and will need your opt-in.
-- Truthful answers: the assistant will say "Unavailable" instead of guessing, and will cite its sources.
-- It works with [NETRA TRIKAAL](https://github.com/prayagi-store-and-services/netra-trikaal), whose code lives in [netra-eco-app](https://github.com/prayagi-store-and-services/netra-eco-app) until launch.
+## Principles
 
-Part of the [Netra Eco](https://prayagi-store-and-services.github.io/netra-eco/) family.
+- Privacy first: everything runs on the phone. No account, no server, no internet permission today. Any future cloud step will show exactly what is sent and where, and needs your opt-in.
+- Truthful answers: anything the phone cannot report shows "Unavailable".
+- Free to use.
+
+## Build
+
+`gradle :app:assembleDebug :app:testDebugUnitTest` (JDK 17, Gradle 8.7). Application ID `com.prayagi.netraassistant`.
 
 ## Licence
 
