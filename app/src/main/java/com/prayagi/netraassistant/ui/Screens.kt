@@ -9,6 +9,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -22,6 +23,8 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.core.content.ContextCompat
 import com.prayagi.netraassistant.assistant.VoiceCommand
+import com.prayagi.netraassistant.voice.HandsFree
+import com.prayagi.netraassistant.voice.HandsFreeService
 import com.prayagi.netraassistant.voice.VoiceEngine
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -72,8 +75,8 @@ fun ChatScreen() {
         val reply = Responder.respondAll(p, IntentParser.parseAll(q), device)
         log.add(Msg(false, reply))
         if (speakReplies) {
-            engine.speak(reply) { if (keepListening && hasMic && engine.canListen()) engine.startListening() }
-        } else if (keepListening && hasMic && engine.canListen()) {
+            engine.speak(reply) { if (keepListening && hasMic && !HandsFree.running && engine.canListen()) engine.startListening() }
+        } else if (keepListening && hasMic && !HandsFree.running && engine.canListen()) {
             engine.startListening()
         }
     }
@@ -153,6 +156,27 @@ fun ChatScreen() {
         Text("Keep listening after each reply", fontSize = 13.sp)
         Switch(checked = keepListening, onCheckedChange = { keepListening = it })
     }
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text("Hands-free (screen off)", fontSize = 13.sp)
+        Switch(checked = HandsFree.running, onCheckedChange = { on ->
+            if (on) {
+                if (!hasMic) {
+                    engine.status = "Allow the microphone first (tap the mic)."
+                } else if (!engine.canListen()) {
+                    engine.status = "Hands-free: Unavailable until voice works (offline Unavailable on this phone; allow online voice first)."
+                } else {
+                    engine.stopListening(); engine.stopSpeaking()
+                    ContextCompat.startForegroundService(ctx, Intent(ctx, HandsFreeService::class.java))
+                }
+            } else {
+                ctx.startService(Intent(ctx, HandsFreeService::class.java).setAction(HandsFreeService.ACTION_STOP))
+            }
+        })
+    }
+    Text(
+        "Hands-free keeps the microphone on with a notification and uses battery. Say \"Netra\" or \"Trikal\" first; other speech is ignored. It stops on the notification Stop button, and it does not restart after a phone restart. Status: ${HandsFree.lastStatus}",
+        fontSize = 12.sp
+    )
     Text(
         "Voice check: offline recognition ${if (engine.offlineAvailable()) "Available" else "Unavailable"}; " +
             "spoken replies ${if (engine.ttsReady) "Available" else "Unavailable"}; Hindi voice ${if (engine.hindiTts) "Available" else "Unavailable"}.",
