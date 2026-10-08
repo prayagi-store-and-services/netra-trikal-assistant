@@ -81,7 +81,7 @@ private fun Header() {
 private fun Footer() {
     Surface(tonalElevation = 3.dp) {
         Text(
-            "On-device only. Nothing leaves this phone.",
+            "On-device by default. Online voice only if you allow it.",
             fontSize = 12.sp,
             modifier = Modifier.fillMaxWidth().padding(10.dp)
         )
