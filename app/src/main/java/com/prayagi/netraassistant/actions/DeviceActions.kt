@@ -14,6 +14,8 @@ sealed class Result<out T> {
 }
 
 data class BatteryInfo(val levelPct: Int, val charging: Boolean)
+data class BatteryTemp(val celsius: Double)
+data class BatteryTime(val hours: Double, val basedOnMa: Int)
 data class VolumeInfo(val current: Int, val max: Int)
 
 class DeviceActions(private val context: Context) {
@@ -32,6 +34,37 @@ class DeviceActions(private val context: Context) {
         }
     } catch (e: Exception) {
         Result.Unavailable("battery read failed")
+    }
+
+
+    fun batteryTemp(): Result<BatteryTemp> = try {
+        val i = context.registerReceiver(null, IntentFilter(AndroidIntent.ACTION_BATTERY_CHANGED))
+        val t = i?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, Int.MIN_VALUE) ?: Int.MIN_VALUE
+        if (t == Int.MIN_VALUE || t <= 0) Result.Unavailable("temperature not reported by this phone")
+        else Result.Value(BatteryTemp(t / 10.0))
+    } catch (e: Exception) {
+        Result.Unavailable("temperature read failed")
+    }
+
+    /** Rough estimate from remaining charge and the current draw right now. Not a prediction of future use. */
+    fun batteryTime(): Result<BatteryTime> = try {
+        val bm = context.getSystemService(Context.BATTERY_SERVICE) as? BatteryManager
+        val counterUah = bm?.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER) ?: 0L
+        val nowUa = bm?.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW) ?: 0L
+        val info = battery()
+        if (info is Result.Value && info.v.charging) {
+            Result.Unavailable("phone is charging, discharge time cannot be estimated")
+        } else if (counterUah <= 0L || nowUa == 0L || nowUa == Long.MIN_VALUE) {
+            Result.Unavailable("this phone does not report remaining charge or current draw")
+        } else {
+            // Units differ by device (uA or mA); values above 20000 are treated as uA.
+            val drawMa = Math.abs(nowUa).let { if (it > 20000L) it / 1000.0 else it.toDouble() }
+            val capMah = counterUah / 1000.0
+            if (drawMa < 1.0 || capMah < 1.0) Result.Unavailable("draw or charge reading too small to trust")
+            else Result.Value(BatteryTime(capMah / drawMa, drawMa.toInt()))
+        }
+    } catch (e: Exception) {
+        Result.Unavailable("battery time read failed")
     }
 
     private fun audio(): AudioManager? =

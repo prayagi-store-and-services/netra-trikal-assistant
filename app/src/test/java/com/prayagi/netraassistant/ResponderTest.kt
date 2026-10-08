@@ -14,6 +14,6 @@ class ResponderTest {
     }
     @Test fun batteryValueShown() {
         val t = Responder.batteryText(Persona.NETRA, Result.Value(BatteryInfo(55, true)))
-        assertTrue(t.contains("55%") && t.contains("charging"))
+        assertTrue(t.contains("55%") && t.contains("charge ho rahi"))
     }
 }
