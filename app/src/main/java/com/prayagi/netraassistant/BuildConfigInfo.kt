@@ -1,5 +1,5 @@
 package com.prayagi.netraassistant
 
 object BuildConfigInfo {
-    const val VERSION = "0.3.1-beta.1"
+    const val VERSION = "0.3.2-beta.1"
 }
