@@ -11,6 +11,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -23,8 +28,21 @@ import java.util.Locale
 /** Family UI standard: fixed small header (name, version, date/time), scrollable body, fixed footer. */
 @Composable
 fun AppShell() {
+    var tab by remember { mutableStateOf(0) }
+    val titles = listOf("Chat", "Permissions", "Privacy")
     Scaffold(
-        topBar = { Header() },
+        topBar = {
+            Column {
+                Header()
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                    titles.forEachIndexed { i, t ->
+                        TextButton(onClick = { tab = i }) {
+                            Text(if (i == tab) "[ $t ]" else t, fontSize = 13.sp)
+                        }
+                    }
+                }
+            }
+        },
         bottomBar = { Footer() }
     ) { pad ->
         Column(
@@ -35,8 +53,11 @@ fun AppShell() {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text("NETRA x TRIKAL", fontSize = 20.sp)
-            Text("Beta scaffold. Features arrive in rolling betas. Unavailable: no assistant features yet.")
+            when (tab) {
+                0 -> ChatScreen()
+                1 -> PermissionsScreen()
+                else -> PrivacyScreen()
+            }
         }
     }
 }
