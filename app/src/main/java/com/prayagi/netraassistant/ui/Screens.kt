@@ -10,6 +10,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import android.Manifest
 import android.content.Intent
+import android.os.Build
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -89,6 +90,14 @@ fun ChatScreen() {
         else if (ok) engine.status = "Offline voice: Unavailable on this phone. Type instead."
         else engine.status = "Microphone permission denied. Voice: Unavailable. You can type instead."
     }
+    fun startHandsFree() {
+        engine.stopListening(); engine.stopSpeaking()
+        ContextCompat.startForegroundService(ctx, Intent(ctx, HandsFreeService::class.java))
+    }
+    val notifLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
+        if (!ok) engine.status = "Notification permission denied: Hands-free runs but its notification may be hidden. Stop it from the app switch."
+        startHandsFree()
+    }
     LaunchedEffect(Unit) {
         if (hasMic && engine.offlineAvailable()) engine.startListening()
     }
@@ -165,8 +174,9 @@ fun ChatScreen() {
                 } else if (!engine.canListen()) {
                     engine.status = "Hands-free: Unavailable until voice works (offline Unavailable on this phone; allow online voice first)."
                 } else {
-                    engine.stopListening(); engine.stopSpeaking()
-                    ContextCompat.startForegroundService(ctx, Intent(ctx, HandsFreeService::class.java))
+                    val needNotif = Build.VERSION.SDK_INT >= 33 &&
+                        ContextCompat.checkSelfPermission(ctx, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+                    if (needNotif) notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS) else startHandsFree()
                 }
             } else {
                 ctx.startService(Intent(ctx, HandsFreeService::class.java).setAction(HandsFreeService.ACTION_STOP))
