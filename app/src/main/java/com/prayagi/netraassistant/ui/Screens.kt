@@ -63,7 +63,7 @@ fun ChatScreen() {
         val q = input.trim()
         if (q.isNotEmpty()) {
             log.add(Msg(true, q))
-            log.add(Msg(false, Responder.respond(persona, IntentParser.parse(q), device)))
+            log.add(Msg(false, Responder.respondAll(persona, IntentParser.parseAll(q), device)))
             input = ""
         }
     }) { Text("Send") }
