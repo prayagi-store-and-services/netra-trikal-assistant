@@ -70,9 +70,9 @@ private fun Header() {
             Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("Netra Assistant", fontSize = 14.sp)
-            Text("v${BuildConfigInfo.VERSION}", fontSize = 12.sp)
-            Text(now, fontSize = 12.sp)
+            Text("Netra Trikal Assistant", fontSize = 13.sp)
+            Text("v${BuildConfigInfo.VERSION}", fontSize = 11.sp)
+            Text(now, fontSize = 11.sp)
         }
     }
 }
