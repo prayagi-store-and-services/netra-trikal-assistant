@@ -13,8 +13,8 @@ android {
         applicationId = "com.prayagi.netraassistant"
         minSdk = 26
         targetSdk = 34
-        versionCode = 8
-        versionName = "0.3.3-beta.1"
+        versionCode = 9
+        versionName = "0.3.4-beta.1"
     }
 
     // Release signing: scaffold only. Reads keystore.properties if present
